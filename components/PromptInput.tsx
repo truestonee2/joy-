@@ -2,6 +2,11 @@
 import React from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 
+export interface Character {
+  name: string;
+  description: string;
+}
+
 interface PromptInputProps {
   prompt: string;
   setPrompt: (prompt: string) => void;
@@ -11,14 +16,20 @@ interface PromptInputProps {
   setCutLength: (length: number | '') => void;
   numCuts: number | '';
   setNumCuts: (cuts: number | '') => void;
+  historicalBackground: string;
+  setHistoricalBackground: (bg: string) => void;
+  nationalBackground: string;
+  setNationalBackground: (bg: string) => void;
   voiceTone: string;
   setVoiceTone: (tone: string) => void;
-  voiceGender: string;
-  setVoiceGender: (gender: string) => void;
+  narratorDescription: string;
+  setNarratorDescription: (desc: string) => void;
   voiceEmotion: string;
   setVoiceEmotion: (emotion: string) => void;
   voiceReverb: string;
   setVoiceReverb: (reverb: string) => void;
+  characters: Character[];
+  setCharacters: (characters: Character[]) => void;
   onSubmit: () => void;
   isLoading: boolean;
 }
@@ -36,21 +47,33 @@ const NumberInput: React.FC<{label: string, value: number | '', onChange: (value
     </div>
 );
 
-const SelectInput: React.FC<{label: string, value: string, onChange: (value: string) => void, disabled: boolean, options: {value: string, label: string}[]}> = ({label, value, onChange, disabled, options}) => (
-    <div className="flex flex-col gap-1.5 flex-1">
-        <label className="text-sm font-medium text-gray-400">{label}</label>
-        <select
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            disabled={disabled}
-            className="w-full p-2 bg-gray-900 border border-gray-600 rounded-md focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-shadow duration-200 text-gray-200 appearance-none"
-             style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
-        >
-            {options.map(option => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-        </select>
-    </div>
+const EditableSelect: React.FC<{
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  disabled: boolean;
+  options: { value: string; label: string }[];
+  placeholder?: string;
+  listId: string;
+}> = ({ label, value, onChange, disabled, options, placeholder, listId }) => (
+  <div className="flex flex-col gap-1.5 flex-1">
+    <label htmlFor={listId + '-input'} className="text-sm font-medium text-gray-400">{label}</label>
+    <input
+      id={listId + '-input'}
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      disabled={disabled}
+      className="w-full p-2 bg-gray-900 border border-gray-600 rounded-md focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-shadow duration-200 text-gray-200"
+      list={listId}
+      placeholder={placeholder}
+    />
+    <datalist id={listId}>
+      {options.map((option) => (
+        <option key={option.value} value={option.label} />
+      ))}
+    </datalist>
+  </div>
 );
 
 
@@ -59,10 +82,13 @@ export const PromptInput: React.FC<PromptInputProps> = ({
     totalTime, setTotalTime,
     cutLength, setCutLength,
     numCuts, setNumCuts,
+    historicalBackground, setHistoricalBackground,
+    nationalBackground, setNationalBackground,
     voiceTone, setVoiceTone,
-    voiceGender, setVoiceGender,
+    narratorDescription, setNarratorDescription,
     voiceEmotion, setVoiceEmotion,
     voiceReverb, setVoiceReverb,
+    characters, setCharacters,
     onSubmit, isLoading 
 }) => {
   const { t } = useLanguage();
@@ -73,37 +99,32 @@ export const PromptInput: React.FC<PromptInputProps> = ({
     }
   };
 
-  const voiceOptions = {
-    tone: [
-        {value: '', label: t.optionDefault},
-        {value: 'calm', label: t.toneCalm},
-        {value: 'energetic', label: t.toneEnergetic},
-        {value: 'dramatic', label: t.toneDramatic},
-        {value: 'mysterious', label: t.toneMysterious},
-        {value: 'formal', label: t.toneFormal},
-    ],
-    gender: [
-        {value: '', label: t.optionDefault},
-        {value: 'male', label: t.genderMale},
-        {value: 'female', label: t.genderFemale},
-        {value: 'non-binary', label: t.genderNonBinary},
-    ],
-    emotion: [
-        {value: '', label: t.optionDefault},
-        {value: 'neutral', label: t.emotionNeutral},
-        {value: 'happy', label: t.emotionHappy},
-        {value: 'sad', label: t.emotionSad},
-        {value: 'angry', label: t.emotionAngry},
-        {value: 'excited', label: t.emotionExcited},
-    ],
-    reverb: [
-        {value: '', label: t.optionDefault},
-        {value: 'none', label: t.reverbNone},
-        {value: 'small-room', label: t.reverbSmallRoom},
-        {value: 'large-hall', label: t.reverbLargeHall},
-        {value: 'cave', label: t.reverbCave},
-    ]
+  const backgroundOptions = {
+    historical: [ {value: 'ancient', label: t.eraAncient}, {value: 'medieval', label: t.eraMedieval}, {value: 'modern', label: t.eraModern}, {value: 'futuristic', label: t.eraFuture}, {value: 'joseon', label: t.eraJoseon}, ],
+    national: [ {value: 'korea', label: t.countryKorea}, {value: 'usa', label: t.countryUSA}, {value: 'japan', label: t.countryJapan}, {value: 'china', label: t.countryChina}, {value: 'fantasy', label: t.countryFantasy}, ]
   };
+
+  const voiceOptions = {
+    tone: [ {value: 'calm', label: t.toneCalm}, {value: 'energetic', label: t.toneEnergetic}, {value: 'dramatic', label: t.toneDramatic}, {value: 'mysterious', label: t.toneMysterious}, {value: 'formal', label: t.toneFormal} ],
+    gender: [ {value: 'male', label: t.genderMale}, {value: 'female', label: t.genderFemale}, {value: 'non-binary', label: t.genderNonBinary}, {value: 'asian-male', label: t.genderAsianMale}, {value: 'asian-female', label: t.genderAsianFemale}, {value: 'black-male', label: t.genderBlackMale}, {value: 'black-female', label: t.genderBlackFemale}, {value: 'white-male', label: t.genderWhiteMale}, {value: 'white-female', label: t.genderWhiteFemale}, {value: 'hispanic-male', label: t.genderHispanicMale}, {value: 'hispanic-female', label: t.genderHispanicFemale}, {value: 'middle-eastern-male', label: t.genderMiddleEasternMale}, {value: 'middle-eastern-female', label: t.genderMiddleEasternFemale}, {value: 'south-asian-male', label: t.genderSouthAsianMale}, {value: 'south-asian-female', label: t.genderSouthAsianFemale}, ],
+    emotion: [ {value: 'neutral', label: t.emotionNeutral}, {value: 'happy', label: t.emotionHappy}, {value: 'sad', label: t.emotionSad}, {value: 'angry', label: t.emotionAngry}, {value: 'excited', label: t.emotionExcited}, ],
+    reverb: [ {value: 'none', label: t.reverbNone}, {value: 'small-room', label: t.reverbSmallRoom}, {value: 'large-hall', label: t.reverbLargeHall}, {value: 'cave', label: t.reverbCave}, ]
+  };
+
+  const handleAddCharacter = () => {
+    setCharacters([...characters, { name: '', description: '' }]);
+  };
+
+  const handleRemoveCharacter = (index: number) => {
+    setCharacters(characters.filter((_, i) => i !== index));
+  };
+
+  const handleCharacterChange = (index: number, field: 'name' | 'description', value: string) => {
+    const newCharacters = [...characters];
+    newCharacters[index] = { ...newCharacters[index], [field]: value };
+    setCharacters(newCharacters);
+  };
+
 
   return (
     <div className="flex flex-col gap-4">
@@ -112,15 +133,39 @@ export const PromptInput: React.FC<PromptInputProps> = ({
             <NumberInput label={t.cutLengthLabel} value={cutLength} onChange={setCutLength} disabled={isLoading} />
             <NumberInput label={t.numCutsLabel} value={numCuts} onChange={setNumCuts} disabled={isLoading} />
         </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <EditableSelect listId="historical-bg" label={t.historicalBackgroundLabel} value={historicalBackground} onChange={setHistoricalBackground} disabled={isLoading} options={backgroundOptions.historical} placeholder={t.optionDefault} />
+            <EditableSelect listId="national-bg" label={t.nationalBackgroundLabel} value={nationalBackground} onChange={setNationalBackground} disabled={isLoading} options={backgroundOptions.national} placeholder={t.optionDefault} />
+        </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <SelectInput label={t.voiceToneLabel} value={voiceTone} onChange={setVoiceTone} disabled={isLoading} options={voiceOptions.tone} />
-            <SelectInput label={t.voiceGenderLabel} value={voiceGender} onChange={setVoiceGender} disabled={isLoading} options={voiceOptions.gender} />
-            <SelectInput label={t.voiceEmotionLabel} value={voiceEmotion} onChange={setVoiceEmotion} disabled={isLoading} options={voiceOptions.emotion} />
-            <SelectInput label={t.voiceReverbLabel} value={voiceReverb} onChange={setVoiceReverb} disabled={isLoading} options={voiceOptions.reverb} />
+            <EditableSelect listId="voice-tone" label={t.voiceToneLabel} value={voiceTone} onChange={setVoiceTone} disabled={isLoading} options={voiceOptions.tone} placeholder={t.optionDefault} />
+            <EditableSelect listId="narrator-desc" label={t.narratorDescriptionLabel} value={narratorDescription} onChange={setNarratorDescription} disabled={isLoading} options={voiceOptions.gender} placeholder={t.optionDefault} />
+            <EditableSelect listId="voice-emotion" label={t.voiceEmotionLabel} value={voiceEmotion} onChange={setVoiceEmotion} disabled={isLoading} options={voiceOptions.emotion} placeholder={t.optionDefault} />
+            <EditableSelect listId="voice-reverb" label={t.voiceReverbLabel} value={voiceReverb} onChange={setVoiceReverb} disabled={isLoading} options={voiceOptions.reverb} placeholder={t.optionDefault} />
         </div>
 
-      <label htmlFor="prompt-input" className="text-lg font-medium text-gray-300">
+        <div className="flex flex-col gap-4 border-t border-gray-700 pt-4 mt-2">
+            <label className="text-md font-medium text-gray-300">{t.charactersTitleInput}</label>
+            <div className="flex flex-col gap-3">
+                {characters.map((char, index) => (
+                    <div key={index} className="grid grid-cols-1 sm:grid-cols-[1fr,2fr,auto] gap-2 p-3 bg-gray-900/50 rounded-lg border border-gray-700">
+                        <input type="text" placeholder={t.characterNamePlaceholder} value={char.name} onChange={(e) => handleCharacterChange(index, 'name', e.target.value)} disabled={isLoading} className="w-full p-2 bg-gray-800 border border-gray-600 rounded-md focus:ring-1 focus:ring-sky-500 focus:border-sky-500 text-gray-200 placeholder-gray-500" />
+                        <input type="text" placeholder={t.characterDescriptionPlaceholder} value={char.description} onChange={(e) => handleCharacterChange(index, 'description', e.target.value)} disabled={isLoading} className="w-full p-2 bg-gray-800 border border-gray-600 rounded-md focus:ring-1 focus:ring-sky-500 focus:border-sky-500 text-gray-200 placeholder-gray-500" />
+                        <button onClick={() => handleRemoveCharacter(index)} disabled={isLoading} title={t.removeCharacterButton} className="p-2 text-gray-400 bg-red-900/50 hover:bg-red-800/70 rounded-md transition-colors flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+                        </button>
+                    </div>
+                ))}
+            </div>
+             <button onClick={handleAddCharacter} disabled={isLoading} className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-sky-300 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                {t.addCharacterButton}
+            </button>
+        </div>
+
+      <label htmlFor="prompt-input" className="text-lg font-medium text-gray-300 mt-4">
         {t.promptLabel}
       </label>
       <textarea

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Scenario } from './OutputDisplay';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -13,10 +12,6 @@ const HistoryIcon: React.FC<{className?: string}> = ({className}) => ( <svg xmln
 export const HistoryDisplay: React.FC<HistoryDisplayProps> = ({ history, onSelect }) => {
     const { t } = useLanguage();
 
-    if (history.length === 0) {
-        return null;
-    }
-
     return (
         <div className="w-full bg-gray-800/50 rounded-2xl shadow-lg border border-gray-700 p-6 animate-fade-in">
             <details className="group">
@@ -30,21 +25,25 @@ export const HistoryDisplay: React.FC<HistoryDisplayProps> = ({ history, onSelec
                     </svg>
                 </summary>
                 <div className="mt-4 pt-4 border-t border-gray-700">
-                    <ul className="space-y-2 max-h-60 overflow-y-auto pr-2">
-                        {history.map((item, index) => (
-                            <li key={index} className="flex justify-between items-center p-3 bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">
-                                <span className="font-medium text-gray-300 truncate" title={item?.title ?? t.untitledScenario}>
-                                    {item?.title ?? t.untitledScenario}
-                                </span>
-                                <button
-                                    onClick={() => onSelect(item)}
-                                    className="px-4 py-1.5 text-sm font-semibold text-white bg-sky-600 rounded-md hover:bg-sky-500 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-sky-500 flex-shrink-0"
-                                >
-                                    {t.historyLoadButton}
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
+                    {history.length > 0 ? (
+                        <ul className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                            {history.map((item, index) => (
+                                <li key={index} className="flex justify-between items-center p-3 bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">
+                                    <span className="font-medium text-gray-300 truncate" title={item?.title ?? t.untitledScenario}>
+                                        {item?.title ?? t.untitledScenario}
+                                    </span>
+                                    <button
+                                        onClick={() => onSelect(item)}
+                                        className="px-4 py-1.5 text-sm font-semibold text-white bg-sky-600 rounded-md hover:bg-sky-500 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-sky-500 flex-shrink-0"
+                                    >
+                                        {t.historyLoadButton}
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p className="text-center text-gray-500 py-4">{t.historyEmpty}</p>
+                    )}
                 </div>
             </details>
         </div>

@@ -1,10 +1,11 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 import { Scenario } from "../components/OutputDisplay";
+import { Character } from "../components/PromptInput";
 
 export interface VoiceParams {
     tone: string;
-    gender: string;
+    narratorDescription: string;
     emotion: string;
     reverb: string;
 }
@@ -15,7 +16,10 @@ export async function generateContentFromPrompt(
     totalTime: number, 
     cutLength: number, 
     numCuts: number,
-    voiceParams: VoiceParams
+    voiceParams: VoiceParams,
+    characters: Character[],
+    historicalBackground: string,
+    nationalBackground: string
 ): Promise<Scenario> {
   // API key is read from environment variables
   if (!process.env.API_KEY) {
@@ -66,10 +70,22 @@ export async function generateContentFromPrompt(
         type: Type.OBJECT,
         description: "Details for generating narration audio, compatible with tools like Suno.",
         properties: {
-            script: { type: Type.STRING, description: "A complete narration script for the entire video, automatically generated to fit the total duration and scenario. This is ready to be pasted into a speech generation tool." },
+            script: { type: Type.STRING, description: "A complete narration script for the entire video, automatically generated to fit the total duration and scenario. This is ready to be pasted into a speech generation tool and includes emotion/style tags." },
             voiceTags: { type: Type.STRING, description: "A string of tags for the AI audio tool, formatted like '[tag1] [tag2]'. For example: '[calm male voice] [sad tone] [light reverb]'."}
         },
         required: ["script", "voiceTags"]
+      },
+      narrationScriptJson: {
+        type: Type.ARRAY,
+        description: "A structured JSON array of the narration script, designed for speech generation tools. Each segment includes text with embedded emotion and speech style tags.",
+        items: {
+            type: Type.OBJECT,
+            properties: {
+                id: { type: Type.INTEGER, description: "Sequential ID for the narration segment." },
+                script_segment: { type: Type.STRING, description: "A segment of the narration script, including detailed emotion and speech style tags in brackets (e.g., '[calmly] Once upon a time... [with wonder] in a land far away.')." }
+            },
+            required: ["id", "script_segment"]
+        }
       },
       timelineJson: {
         type: Type.ARRAY,
@@ -97,10 +113,25 @@ export async function generateContentFromPrompt(
         required: ["style", "instruments", "mood"]
       }
     },
-    required: ["title", "logline", "characters", "scenes", "narration", "timelineJson", "bgm"]
+    required: ["title", "logline", "characters", "scenes", "narration", "narrationScriptJson", "timelineJson", "bgm"]
   };
 
+  let charactersPromptSection = "Characters: Not specified by user. Please generate compelling characters based on the scenario.";
+  if (characters && characters.length > 0 && characters.some(c => c.name || c.description)) {
+      const characterDescriptions = characters
+          .filter(c => c.name || c.description)
+          .map((c, index) => `- ${c.name || `Character ${index + 1}`}: ${c.description || 'No description provided.'}`)
+          .join('\n');
+      charactersPromptSection = `Use the following user-defined characters for the story:\n${characterDescriptions}`;
+  }
+
   const detailedPrompt = `Generate a short-form video scenario based on the following prompt: "${prompt}".
+
+Scenario Background:
+- Historical Background: ${historicalBackground || 'Not specified'}
+- National/Regional Background: ${nationalBackground || 'Not specified'}
+
+${charactersPromptSection}
 
 Constraints:
 - Total Video Length: ${totalTime} seconds
@@ -109,7 +140,7 @@ Constraints:
 
 Narration Voice Parameters:
 - Tone: ${voiceParams.tone || 'Not specified'}
-- Gender: ${voiceParams.gender || 'Not specified'}
+- Narrator Gender/Description: ${voiceParams.narratorDescription || 'Not specified'}
 - Emotion: ${voiceParams.emotion || 'Not specified'}
 - Reverb: ${voiceParams.reverb || 'Not specified'}
 
@@ -123,12 +154,15 @@ Your task is to auto-generate a full narration script and scene-by-scene dialogu
         systemInstruction: `You are an expert prompt engineer and creative writer for AI video and audio generation tools. Your output must be a single, valid JSON object adhering to the provided schema.
 
 Key instructions:
+- **Adhere to the specified Historical and National/Regional backgrounds.** This context is crucial for setting, character design, and plot.
+- **If user-defined characters are provided, you MUST use them as the main characters.** The 'characters' array in your JSON output must reflect these user-defined characters. Do not invent new main characters unless the prompt explicitly asks for more.
 - **As a world-class genius film score composer**, you must generate a BGM (Background Music) prompt based on the entire scenario. This includes defining the style/genre, key instruments, and overall mood.
-- **narration.script**: Based on the user's prompt, write a full, cohesive narration script for the entire video's duration. This script should be ready for a text-to-speech engine.
+- **narration.script**: Based on the user's prompt, write a full, cohesive narration script for the entire video's duration. This script should be ready for a text-to-speech engine. Crucially, embed detailed emotion and speech style tags directly within the script using square brackets, similar to the dialogue (e.g., '[thoughtfully] In a world... [with dramatic emphasis] ...where nothing is as it seems.').
 - **scenes.dialogue**: For each scene, generate relevant dialogue. Crucially, embed detailed voice and emotion tags directly within the dialogue string using square brackets, like 'Character A: [shouting angrily] I can't believe it!'. If there is no dialogue, you must use the string 'None'.
 - **scenes.dialogueStructure**: Classify the dialogue in each scene into one of the following categories: 'Narration', 'Monologue', '1-on-1 Conversation', or 'Multi-person Conversation'.
 - **scenes**: Create a human-readable breakdown for each scene. The number of scenes must exactly match the user's request.
 - **narration.voiceTags**: Based on the user's voice parameters, generate a compact, tag-based 'voiceTags' string for an AI audio tool like Suno.
+- **narrationScriptJson**: Create a structured JSON array for the narration. Break the full narration script into logical segments. For each segment, create an object with an 'id' and a 'script_segment'. The 'script_segment' must contain the text along with embedded emotion and speech style tags in square brackets, like '[thoughtful] It all began... [dramatic pause] ...with a single choice.' This JSON is for direct use in speech synthesis APIs.
 - **timelineJson**: Create a machine-readable JSON array for video tools like Sora or Veo. Combine 'visualPrompt' and 'cameraMovement' into a single 'prompt' field. Populate the 'dialogue' field in each timeline object with the content from the corresponding scene's 'dialogue'. Calculate 'start_time' and 'end_time' for each scene.
 
 ${languageInstruction}`,

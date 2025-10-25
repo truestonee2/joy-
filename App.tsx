@@ -1,7 +1,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { Header } from './components/Header';
-import { PromptInput } from './components/PromptInput';
+import { PromptInput, Character } from './components/PromptInput';
 import { OutputDisplay, Scenario } from './components/OutputDisplay';
 import { HistoryDisplay } from './components/HistoryDisplay';
 import { generateContentFromPrompt } from './services/geminiService';
@@ -20,10 +20,14 @@ const App: React.FC = () => {
   const [cutLength, setCutLength] = useState<number | ''>('');
   const [numCuts, setNumCuts] = useState<number | ''>('');
   
+  const [historicalBackground, setHistoricalBackground] = useState<string>('');
+  const [nationalBackground, setNationalBackground] = useState<string>('');
   const [voiceTone, setVoiceTone] = useState<string>('');
-  const [voiceGender, setVoiceGender] = useState<string>('');
+  const [narratorDescription, setNarratorDescription] = useState<string>('');
   const [voiceEmotion, setVoiceEmotion] = useState<string>('');
   const [voiceReverb, setVoiceReverb] = useState<string>('');
+  const [characters, setCharacters] = useState<Character[]>([]);
+
 
   const [output, setOutput] = useState<Scenario | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -56,7 +60,7 @@ const App: React.FC = () => {
 
     const voiceParams = {
         tone: voiceTone,
-        gender: voiceGender,
+        narratorDescription: narratorDescription,
         emotion: voiceEmotion,
         reverb: voiceReverb
     };
@@ -68,7 +72,10 @@ const App: React.FC = () => {
           totalTime || DEFAULT_VIDEO_PARAMS.totalTime, 
           cutLength || DEFAULT_VIDEO_PARAMS.cutLength, 
           numCuts || DEFAULT_VIDEO_PARAMS.numCuts,
-          voiceParams
+          voiceParams,
+          characters,
+          historicalBackground,
+          nationalBackground
       );
       setOutput(result);
       setHistory(prevHistory => [result, ...prevHistory]);
@@ -77,17 +84,20 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [prompt, isLoading, locale, totalTime, cutLength, numCuts, voiceTone, voiceGender, voiceEmotion, voiceReverb]);
+  }, [prompt, isLoading, locale, totalTime, cutLength, numCuts, voiceTone, narratorDescription, voiceEmotion, voiceReverb, characters, historicalBackground, nationalBackground]);
 
   const handleReset = useCallback(() => {
     setPrompt('');
     setTotalTime('');
     setCutLength('');
     setNumCuts('');
+    setHistoricalBackground('');
+    setNationalBackground('');
     setVoiceTone('');
-    setVoiceGender('');
+    setNarratorDescription('');
     setVoiceEmotion('');
     setVoiceReverb('');
+    setCharacters([]);
     setOutput(null);
     setError(null);
   }, []);
@@ -115,14 +125,20 @@ const App: React.FC = () => {
               setCutLength={setCutLength}
               numCuts={numCuts}
               setNumCuts={setNumCuts}
+              historicalBackground={historicalBackground}
+              setHistoricalBackground={setHistoricalBackground}
+              nationalBackground={nationalBackground}
+              setNationalBackground={setNationalBackground}
               voiceTone={voiceTone}
               setVoiceTone={setVoiceTone}
-              voiceGender={voiceGender}
-              setVoiceGender={setVoiceGender}
+              narratorDescription={narratorDescription}
+              setNarratorDescription={setNarratorDescription}
               voiceEmotion={voiceEmotion}
               setVoiceEmotion={setVoiceEmotion}
               voiceReverb={voiceReverb}
               setVoiceReverb={setVoiceReverb}
+              characters={characters}
+              setCharacters={setCharacters}
               onSubmit={handleSubmit}
               isLoading={isLoading}
             />

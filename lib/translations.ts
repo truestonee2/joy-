@@ -26,12 +26,15 @@ export const en = {
   "dialogueLabel": "Dialogue / Dubbing",
   "dialogueStructureLabel": "Dialogue Structure",
 
+  "historicalBackgroundLabel": "Historical Background",
+  "nationalBackgroundLabel": "National Background",
+
   "voiceToneLabel": "Tone",
-  "voiceGenderLabel": "Gender",
+  "narratorDescriptionLabel": "Narrator Gender / Desc",
   "voiceEmotionLabel": "Emotion",
   "voiceReverbLabel": "Reverb",
 
-  "optionDefault": "Select an option...",
+  "optionDefault": "Select or type...",
   "toneCalm": "Calm",
   "toneEnergetic": "Energetic",
   "toneDramatic": "Dramatic",
@@ -41,6 +44,18 @@ export const en = {
   "genderMale": "Male",
   "genderFemale": "Female",
   "genderNonBinary": "Non-binary",
+  "genderAsianMale": "Asian Male",
+  "genderAsianFemale": "Asian Female",
+  "genderBlackMale": "Black Male",
+  "genderBlackFemale": "Black Female",
+  "genderWhiteMale": "White Male",
+  "genderWhiteFemale": "White Female",
+  "genderHispanicMale": "Hispanic Male",
+  "genderHispanicFemale": "Hispanic Female",
+  "genderMiddleEasternMale": "Middle Eastern Male",
+  "genderMiddleEasternFemale": "Middle Eastern Female",
+  "genderSouthAsianMale": "South Asian Male",
+  "genderSouthAsianFemale": "South Asian Female",
 
   "emotionNeutral": "Neutral",
   "emotionHappy": "Happy",
@@ -52,10 +67,23 @@ export const en = {
   "reverbSmallRoom": "Small Room",
   "reverbLargeHall": "Large Hall",
   "reverbCave": "Cave",
+
+  "eraAncient": "Ancient",
+  "eraMedieval": "Medieval",
+  "eraModern": "Modern",
+  "eraFuture": "Futuristic",
+  "eraJoseon": "Joseon Dynasty",
+
+  "countryKorea": "South Korea",
+  "countryUSA": "United States",
+  "countryJapan": "Japan",
+  "countryChina": "China",
+  "countryFantasy": "Fantasy World",
   
   "sunoTitle": "Suno Narration Script",
   "narrationScriptLabel": "Narration Script",
   "voiceTagsLabel": "Voice Tags",
+  "narrationJsonTitle": "Narration Script JSON",
   "soraVeoTitle": "Sora/Veo Timeline JSON",
   "soraVeoJsonPrompt": "Sora/Veo JSON Prompt",
 
@@ -74,7 +102,13 @@ export const en = {
   "historyTitle": "Generation History",
   "historyEmpty": "No scenarios generated yet. Your history will appear here.",
   "historyLoadButton": "Load",
-  "untitledScenario": "Untitled Scenario"
+  "untitledScenario": "Untitled Scenario",
+
+  "charactersTitleInput": "Characters",
+  "addCharacterButton": "Add Character",
+  "removeCharacterButton": "Remove",
+  "characterNamePlaceholder": "Name (e.g., Alex)",
+  "characterDescriptionPlaceholder": "Description (e.g., a weary old detective)"
 };
 
 export const ko = {
@@ -104,12 +138,15 @@ export const ko = {
   "dialogueLabel": "대화 / 더빙",
   "dialogueStructureLabel": "대화 구조",
 
+  "historicalBackgroundLabel": "시대적 배경",
+  "nationalBackgroundLabel": "국가적 배경",
+
   "voiceToneLabel": "목소리 톤",
-  "voiceGenderLabel": "성별",
+  "narratorDescriptionLabel": "내레이터 성별/설명",
   "voiceEmotionLabel": "감정",
   "voiceReverbLabel": "리버브",
 
-  "optionDefault": "선택하세요...",
+  "optionDefault": "선택 또는 직접 입력...",
   "toneCalm": "차분한",
   "toneEnergetic": "활기찬",
   "toneDramatic": "극적인",
@@ -119,6 +156,18 @@ export const ko = {
   "genderMale": "남성",
   "genderFemale": "여성",
   "genderNonBinary": "논바이너리",
+  "genderAsianMale": "아시아 남성",
+  "genderAsianFemale": "아시아 여성",
+  "genderBlackMale": "흑인 남성",
+  "genderBlackFemale": "흑인 여성",
+  "genderWhiteMale": "백인 남성",
+  "genderWhiteFemale": "백인 여성",
+  "genderHispanicMale": "히스패닉 남성",
+  "genderHispanicFemale": "히스패닉 여성",
+  "genderMiddleEasternMale": "중동 남성",
+  "genderMiddleEasternFemale": "중동 여성",
+  "genderSouthAsianMale": "남아시아 남성",
+  "genderSouthAsianFemale": "남아시아 여성",
 
   "emotionNeutral": "중립",
   "emotionHappy": "행복한",
@@ -131,9 +180,22 @@ export const ko = {
   "reverbLargeHall": "큰 홀",
   "reverbCave": "동굴",
 
+  "eraAncient": "고대",
+  "eraMedieval": "중세",
+  "eraModern": "현대",
+  "eraFuture": "미래",
+  "eraJoseon": "조선시대",
+
+  "countryKorea": "대한민국",
+  "countryUSA": "미국",
+  "countryJapan": "일본",
+  "countryChina": "중국",
+  "countryFantasy": "판타지 세계",
+
   "sunoTitle": "Suno 나레이션 스크립트",
   "narrationScriptLabel": "나레이션 스크립트",
   "voiceTagsLabel": "음성 태그",
+  "narrationJsonTitle": "나레이션 스크립트 JSON",
   "soraVeoTitle": "Sora/Veo 타임라인 JSON",
   "soraVeoJsonPrompt": "Sora/Veo JSON 프롬프트",
   
@@ -152,5 +214,11 @@ export const ko = {
   "historyTitle": "생성 기록",
   "historyEmpty": "아직 생성된 시나리오가 없습니다. 기록은 여기에 표시됩니다.",
   "historyLoadButton": "불러오기",
-  "untitledScenario": "제목 없는 시나리오"
+  "untitledScenario": "제목 없는 시나리오",
+
+  "charactersTitleInput": "등장인물",
+  "addCharacterButton": "등장인물 추가",
+  "removeCharacterButton": "삭제",
+  "characterNamePlaceholder": "이름 (예: 알렉스)",
+  "characterDescriptionPlaceholder": "설명 (예: 지친 노년의 탐정)"
 };

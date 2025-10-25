@@ -9,8 +9,9 @@ export interface Character { name: string; description: string; }
 export interface Scene { scene: number; timeline: string; visualPrompt: string; cameraMovement: string; dialogue: string; dialogueStructure: string; duration: number; }
 export interface Narration { script: string; voiceTags: string; }
 export interface TimelineJsonItem { id: number; start_time: number; end_time: number; prompt: string; dialogue: string; }
+export interface NarrationScriptJsonItem { id: number; script_segment: string; }
 export interface BGM { style: string; instruments: string; mood: string; }
-export interface Scenario { title: string; logline: string; characters: Character[]; scenes: Scene[]; narration: Narration; timelineJson: TimelineJsonItem[]; bgm: BGM; }
+export interface Scenario { title: string; logline: string; characters: Character[]; scenes: Scene[]; narration: Narration; narrationScriptJson: NarrationScriptJsonItem[]; timelineJson: TimelineJsonItem[]; bgm: BGM; }
 
 interface OutputDisplayProps { output: Scenario | null; isLoading: boolean; error: string | null; }
 
@@ -98,9 +99,11 @@ const BgmSection: React.FC<{ bgm: BGM | undefined; t: typeof en }> = ({ bgm, t }
     );
 };
 
-const NarrationSection: React.FC<{ narration: Narration | undefined; t: typeof en }> = ({ narration, t }) => {
+const NarrationSection: React.FC<{ narration: Narration | undefined; narrationScriptJson: NarrationScriptJsonItem[] | undefined; t: typeof en }> = ({ narration, narrationScriptJson, t }) => {
     if (!narration) return null;
     const narrationText = `${t.narrationScriptLabel}:\n${narration.script}\n\n${t.voiceTagsLabel}: ${narration.voiceTags}`;
+    const narrationJsonText = narrationScriptJson ? JSON.stringify(narrationScriptJson, null, 2) : '';
+
     return (
         <div className="relative bg-gray-800 rounded-lg p-5 border border-gray-700 shadow-md">
             <CopyButton textToCopy={narrationText} className="absolute top-4 right-4 z-10" />
@@ -118,6 +121,23 @@ const NarrationSection: React.FC<{ narration: Narration | undefined; t: typeof e
                     <p className="font-mono text-emerald-400 bg-gray-900 p-2 rounded-md">{narration.voiceTags}</p>
                 </div>
             </div>
+            {narrationScriptJson && narrationJsonText && (
+                <div className="mt-4 pt-4 border-t border-gray-700/50">
+                    <details className="group">
+                        <summary className="flex justify-between items-center cursor-pointer list-none text-md font-semibold text-gray-300 hover:text-sky-400 transition-colors">
+                            <div className="flex items-center gap-2">
+                                <JsonIcon className="w-5 h-5" />
+                                <span>{t.narrationJsonTitle}</span>
+                            </div>
+                            <svg className="w-5 h-5 transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                        </summary>
+                        <div className="relative mt-2">
+                            <CopyButton textToCopy={narrationJsonText} className="absolute top-2 right-2 z-10" />
+                            <pre className="text-xs text-gray-300 bg-gray-900 p-3 rounded-md overflow-x-auto max-h-60"><code>{narrationJsonText}</code></pre>
+                        </div>
+                    </details>
+                </div>
+            )}
         </div>
     );
 };
@@ -194,7 +214,7 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({ output, isLoading,
           </div>
           <CharactersSection characters={output?.characters ?? []} t={t} />
           <BgmSection bgm={output?.bgm} t={t} />
-          <NarrationSection narration={output?.narration} t={t} />
+          <NarrationSection narration={output?.narration} narrationScriptJson={output?.narrationScriptJson} t={t} />
           <div>
             <h2 className="text-2xl font-bold mb-4 border-b-2 border-gray-600 pb-2 text-gray-100">{t.scenesTitle}</h2>
             <div className="space-y-4">
