@@ -107,6 +107,16 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
+  const handleHistoryDelete = useCallback((indexToDelete: number) => {
+    setHistory(prevHistory => prevHistory.filter((_, index) => index !== indexToDelete));
+  }, []);
+
+  const handleHistoryClear = useCallback(() => {
+    if (window.confirm(t.historyClearConfirmation)) {
+      setHistory([]);
+    }
+  }, [t.historyClearConfirmation]);
+
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-200 font-sans flex flex-col items-center p-4 sm:p-6 lg:p-8">
@@ -151,7 +161,7 @@ const App: React.FC = () => {
             />
           </div>
           <div className="mt-8">
-            <HistoryDisplay history={history} onSelect={handleHistorySelect} />
+            <HistoryDisplay history={history} onSelect={handleHistorySelect} onDelete={handleHistoryDelete} onClear={handleHistoryClear} />
           </div>
         </main>
       </div>

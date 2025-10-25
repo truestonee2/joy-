@@ -102,6 +102,9 @@ export const en = {
   "historyTitle": "Generation History",
   "historyEmpty": "No scenarios generated yet. Your history will appear here.",
   "historyLoadButton": "Load",
+  "historyDeleteButton": "Delete",
+  "historyClearButton": "Clear History",
+  "historyClearConfirmation": "Are you sure you want to delete all generation history? This action cannot be undone.",
   "untitledScenario": "Untitled Scenario",
 
   "charactersTitleInput": "Characters",
@@ -214,6 +217,9 @@ export const ko = {
   "historyTitle": "생성 기록",
   "historyEmpty": "아직 생성된 시나리오가 없습니다. 기록은 여기에 표시됩니다.",
   "historyLoadButton": "불러오기",
+  "historyDeleteButton": "삭제",
+  "historyClearButton": "기록 전체 삭제",
+  "historyClearConfirmation": "모든 생성 기록을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
   "untitledScenario": "제목 없는 시나리오",
 
   "charactersTitleInput": "등장인물",
