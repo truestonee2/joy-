@@ -1,0 +1,5 @@
+{
+  "name": "Jason's Scenario Superprint",
+  "description": "An application that takes a user-defined scenario or prompt and uses the Gemini API to generate a beautifully formatted, 'superprinted' output.",
+  "requestFramePermissions": []
+}
